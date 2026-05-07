@@ -178,11 +178,12 @@ export default function SegurosTab() {
               <div className="card-header"><span className="card-title">Añadir código adicional</span></div>
               <div className="card-body">
                 <div className="flex gap-3 mb-2">
-                  <input className="form-input" placeholder="Introduce código promocional" value={quote.promoInput} onChange={e=>setQuote(q=>({...q,promoInput:e.target.value}))} onKeyDown={e=>e.key==='Enter'&&applyPromo()} />
+                  <input className="form-input" placeholder="Ej: VERANO26, NUEVO50, VIP2026..." value={quote.promoInput} onChange={e=>setQuote(q=>({...q,promoInput:e.target.value}))} onKeyDown={e=>e.key==='Enter'&&applyPromo()} />
                   <button className="btn btn--secondary" onClick={applyPromo}>Aplicar</button>
                 </div>
                 {promoError && <p className="text-sm text-danger">{promoError}</p>}
                 {promoSuccess && <p className="text-sm text-success">{promoSuccess}</p>}
+                <p className="form-hint">Códigos disponibles: VERANO26 · NUEVO50 · VIP2026 · FAMILIA · ONLINE10 · FIDELIDAD · EMPLEADO40</p>
               </div>
             </div>
 
