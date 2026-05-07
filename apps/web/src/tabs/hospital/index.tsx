@@ -109,19 +109,19 @@ export default function HospitalTab() {
           <button className="btn btn--outline btn--sm mb-6" onClick={()=>setView('buscar')}>← Volver a búsqueda</button>
           <div className="grid-2" style={{marginBottom:'var(--sp-6)'}}>
             <div className="card" style={{gridColumn:'1/-1'}}>
-              <div className="card-header" style={{background:'linear-gradient(90deg,#1E3A8A,#1E40AF)',color:'#fff'}}>
+              <div className="card-header card-header--dark">
                 <div className="flex items-center gap-4">
-                  <div className="avatar avatar--lg" style={{background:'#3B82F6'}}>{p.name.split(' ').map(w=>w[0]).slice(0,2).join('')}</div>
+                  <div className="avatar avatar--lg" style={{background:'var(--c-primary)'}}>{p.name.split(' ').map(w=>w[0]).slice(0,2).join('')}</div>
                   <div>
-                    <div style={{fontFamily:'var(--f-display)',fontSize:20,fontWeight:700}}>{p.name}</div>
-                    <div style={{fontSize:13,opacity:.8}}>NHC: {p.nhc} · DNI: {p.dni} · {p.gender==='F'?'Femenino':'Masculino'} · {p.age} años</div>
-                    <div style={{fontSize:13,opacity:.8}}>{p.bloodType} · Nacimiento: {new Date(p.dob).toLocaleDateString('es-ES')}</div>
+                    <div className="font-display font-bold text-xl" style={{color:'#fff'}}>{p.name}</div>
+                    <div className="text-sm" style={{color:'rgba(255,255,255,.8)'}}>NHC: {p.nhc} · DNI: {p.dni} · {p.gender==='F'?'Femenino':'Masculino'} · {p.age} años</div>
+                    <div className="text-sm" style={{color:'rgba(255,255,255,.8)'}}>{p.bloodType} · Nacimiento: {new Date(p.dob).toLocaleDateString('es-ES')}</div>
                   </div>
                 </div>
                 <div style={{textAlign:'right'}}>
-                  <div style={{fontSize:12,opacity:.7,marginBottom:4}}>Ingreso</div>
-                  <div style={{fontWeight:600}}>{p.admissionDate}</div>
-                  <div style={{fontSize:13,opacity:.7}}>{p.ward}</div>
+                  <div className="text-xs" style={{color:'rgba(255,255,255,.6)',marginBottom:4}}>Ingreso</div>
+                  <div className="font-semibold" style={{color:'#fff'}}>{p.admissionDate}</div>
+                  <div className="text-sm" style={{color:'rgba(255,255,255,.7)'}}>{p.ward}</div>
                 </div>
               </div>
             </div>
@@ -188,19 +188,19 @@ export default function HospitalTab() {
     switch (view) {
       case 'dashboard': return (
         <div>
-          <div style={{background:'linear-gradient(135deg,#1E3A8A,#1E40AF)',color:'#fff',padding:'var(--sp-8) var(--sp-6)'}}>
+          <div className="hero hero--sm hero--blue">
             <div className="container">
               <div className="flex justify-between items-center flex-wrap gap-4">
                 <div>
-                  <h1 className="hero-title" style={{fontSize:26}}>Sistema de Información Hospitalaria</h1>
+                  <h1 className="hero-title hero-title--sm">Sistema de Información Hospitalaria</h1>
                   <p className="hero-subtitle">Hospital Universitario Central · Plataforma SIH v6.4</p>
                 </div>
                 <div>
                   <div className="flex items-center gap-3 p-4" style={{background:'rgba(255,255,255,.1)',borderRadius:'var(--r-lg)'}}>
                     <div className="avatar" style={{background:currentDoctor.color,fontSize:13}}>{currentDoctor.avatar}</div>
                     <div>
-                      <div style={{fontWeight:600,fontSize:14}}>{currentDoctor.name}</div>
-                      <div style={{fontSize:12,opacity:.7}}>{currentDoctor.specialty}</div>
+                      <div className="font-semibold text-sm" style={{color:'#fff'}}>{currentDoctor.name}</div>
+                      <div className="text-xs" style={{color:'rgba(255,255,255,.7)'}}>{currentDoctor.specialty}</div>
                     </div>
                   </div>
                   <div className="text-xs mt-2" style={{color:'rgba(255,255,255,.5)',textAlign:'center'}}>
@@ -230,8 +230,8 @@ export default function HospitalTab() {
                 <div className="card-header"><span className="card-title">Pacientes recientes</span></div>
                 <div>
                   {PATIENTS.map(p=>(
-                    <div key={p.id} className="flex items-center gap-3" style={{padding:'var(--sp-4) var(--sp-5)',borderBottom:'1px solid var(--c-border)',cursor:'pointer'}} onClick={()=>{setSelectedPatient(p);setView('paciente')}}>
-                      <div className="avatar avatar--sm" style={{background:'#1E40AF',fontSize:12}}>{p.name.split(' ').map(w=>w[0]).slice(0,2).join('')}</div>
+                    <div key={p.id} className="flex items-center gap-3 px-4 py-2" style={{borderBottom:'1px solid var(--c-border)',cursor:'pointer'}} onClick={()=>{setSelectedPatient(p);setView('paciente')}}>
+                      <div className="avatar avatar--sm" style={{background:'var(--c-primary)',fontSize:12}}>{p.name.split(' ').map(w=>w[0]).slice(0,2).join('')}</div>
                       <div style={{flex:1}}>
                         <div className="font-semibold text-sm">{p.name}</div>
                         <div className="text-xs text-2">NHC: {p.nhc} · {p.ward}</div>
@@ -275,7 +275,7 @@ export default function HospitalTab() {
             : searchResults.map(p=>(
               <div key={p.id} className="card mb-3" style={{cursor:'pointer'}} onClick={()=>{setSelectedPatient(p);setView('paciente')}}>
                 <div className="card-body flex items-center gap-4">
-                  <div className="avatar" style={{background:'#1E40AF'}}>{p.name.split(' ').map(w=>w[0]).slice(0,2).join('')}</div>
+                  <div className="avatar" style={{background:'var(--c-primary)'}}>{p.name.split(' ').map(w=>w[0]).slice(0,2).join('')}</div>
                   <div style={{flex:1}}>
                     <div className="font-semibold">{p.name}</div>
                     <div className="text-sm text-2">NHC: {p.nhc} · DNI: {p.dni} · {p.age} años · {p.bloodType}</div>
@@ -284,7 +284,7 @@ export default function HospitalTab() {
                       {p.diagnoses.map(d=><span key={d.code} className={`badge badge--${d.severity==='crítico'||d.severity==='grave'?'danger':d.severity==='moderado'?'warning':'neutral'}`}>{d.code} {d.description}</span>)}
                     </div>
                   </div>
-                  <span style={{color:'var(--c-primary)',fontSize:18}}>→</span>
+                  <span className="text-primary" style={{fontSize:18}}>→</span>
                 </div>
               </div>
             ))
@@ -300,7 +300,7 @@ export default function HospitalTab() {
               <p className="text-sm text-2">Consulta información de expedientes mediante lenguaje natural</p>
             </div>
             <div className="flex items-center gap-2 p-3" style={{background:'#F0FDF4',borderRadius:'var(--r-md)',border:'1px solid #BBF7D0'}}>
-              <div style={{width:8,height:8,background:'#16A34A',borderRadius:'50%',animation:'pulse 2s infinite'}}/>
+              <div style={{width:8,height:8,background:'var(--c-success)',borderRadius:'50%',animation:'pulse 2s infinite'}}/>
               <span className="text-sm font-semibold text-success">Modelo activo · RAG v3.1</span>
             </div>
           </div>
@@ -317,7 +317,7 @@ export default function HospitalTab() {
               ))}
               {chatLoading && (
                 <div className="chat-msg chat-msg--ai">
-                  <div className="chat-bubble flex items-center gap-2" style={{color:'var(--c-text-2)'}}>
+                  <div className="chat-bubble flex items-center gap-2 text-2">
                     <span className="spinner" style={{width:14,height:14}}/>Consultando registros...
                   </div>
                 </div>

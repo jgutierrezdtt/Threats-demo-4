@@ -49,11 +49,11 @@ export default function TelcoIaCTab() {
     switch (view) {
       case 'dashboard': return (
         <div>
-          <div style={{background:'linear-gradient(135deg,#78350F,#B45309)',color:'#fff',padding:'var(--sp-8) var(--sp-6)'}}>
+          <div className="hero hero--sm" style={{background:'linear-gradient(135deg,#78350F,#B45309)'}}>
             <div className="container">
               <div className="flex justify-between items-center flex-wrap gap-4">
                 <div>
-                  <h1 className="hero-title" style={{fontSize:26}}>TelcoCore IaC Console</h1>
+                  <h1 className="hero-title hero-title--sm">TelcoCore IaC Console</h1>
                   <p className="hero-subtitle">Infraestructura como código · Terraform v1.7.4 · AWS eu-west-1</p>
                 </div>
                 <div className="flex gap-3">
@@ -86,7 +86,7 @@ export default function TelcoIaCTab() {
               ))}
             </div>
 
-            <h2 className="section-title" style={{fontSize:17}}>Componentes de infraestructura</h2>
+              <h2 className="section-title text-base mb-4">Componentes de infraestructura</h2>
             <div className="grid-3">
               {INFRA_COMPONENTS.map(c=>(
                 <div key={c.id} className="card" style={{borderLeft:`3px solid ${statusColor(c.status)}`}}>
@@ -145,7 +145,7 @@ export default function TelcoIaCTab() {
         <div className="page">
           <div className="page-header">
             <div>
-              <h1 className="section-title" style={{marginBottom:4}}>Terraform Plan</h1>
+              <h1 className="section-title text-base mb-0">Terraform Plan</h1>
               <p className="text-sm text-2">Previsualiza los cambios antes de aplicar</p>
             </div>
             <button className="btn btn--dark" onClick={runPlan} disabled={planRunning}>
@@ -172,7 +172,7 @@ export default function TelcoIaCTab() {
         <div className="page">
           <div className="page-header">
             <div>
-              <h1 className="section-title" style={{marginBottom:4}}>Terraform Apply</h1>
+              <h1 className="section-title text-base mb-0">Terraform Apply</h1>
               <p className="text-sm text-2">Aplica los cambios en infraestructura</p>
             </div>
           </div>

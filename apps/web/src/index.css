@@ -122,6 +122,10 @@ a { color: inherit; text-decoration: none; }
   overflow: hidden;
 }
 .card-header { padding: var(--sp-5) var(--sp-6); border-bottom: 1px solid var(--c-border); display: flex; align-items: center; justify-content: space-between; }
+.card-header--purple { background: linear-gradient(90deg, #5B21B6, #7C3AED); color: #fff; }
+.card-header--dark   { background: var(--c-bg-dark); color: #fff; }
+.card-header--purple .card-title,
+.card-header--dark   .card-title { color: #fff; }
 .card-body   { padding: var(--sp-6); }
 .card-footer { padding: var(--sp-4) var(--sp-6); border-top: 1px solid var(--c-border); background: var(--c-bg); }
 .card-title    { font-family: var(--f-display); font-weight: 600; font-size: 17px; }
@@ -238,7 +242,6 @@ a { color: inherit; text-decoration: none; }
 .text-success { color: var(--c-success); }
 .text-warning { color: var(--c-warning); }
 .text-danger  { color: var(--c-danger); }
-.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .list-none { list-style: none; padding-left: 0; margin: 0; }
 .list-none li { position: relative; padding-left: var(--sp-4); }
 .list-none li::before { content: '–'; position: absolute; left: 0; color: var(--c-text-2); }
@@ -248,9 +251,21 @@ a { color: inherit; text-decoration: none; }
   background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
   color: #fff; padding: var(--sp-12) var(--sp-6);
 }
-.hero--sm { padding: var(--sp-8) var(--sp-6); }
+.hero--sm     { padding: var(--sp-8) var(--sp-6); }
+.hero--purple { background: linear-gradient(135deg, #5B21B6 0%, #3730A3 100%); }
+.hero--blue   { background: linear-gradient(135deg, #1D4ED8 0%, #1E40AF 100%); }
+.hero--teal   { background: linear-gradient(135deg, #0F766E 0%, #0D9488 100%); }
+.hero--green  { background: linear-gradient(135deg, #15803D 0%, #166534 100%); }
 .hero-title    { font-family: var(--f-display); font-size: 32px; font-weight: 800; margin-bottom: var(--sp-3); line-height: 1.2; }
+.hero-title--sm { font-size: 26px; }
 .hero-subtitle { font-size: 16px; color: #94A3B8; max-width: 560px; }
+
+/* ── Price display ─────────────────────────────────────────── */
+.price-display { font-family: var(--f-display); font-weight: 800; line-height: 1; }
+.price-display--lg { font-size: 30px; }
+.price-display--xl { font-size: 36px; }
+.price-display--purple { color: var(--c-secondary); }
+.price-display--primary { color: var(--c-primary); }
 
 /* ── Stat cards ────────────────────────────────────────────── */
 .stat-card { background: #fff; border: 1px solid var(--c-border); border-radius: var(--r-lg); padding: var(--sp-5) var(--sp-6); box-shadow: var(--shadow-sm); border-left: 4px solid var(--c-primary); }

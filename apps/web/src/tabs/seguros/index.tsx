@@ -86,9 +86,9 @@ export default function SegurosTab() {
     switch (view) {
       case 'catalogo': return (
         <div>
-          <div style={{background:'linear-gradient(135deg,#5B21B6,#7C3AED)',color:'#fff',padding:'var(--sp-8) var(--sp-6)'}}>
+          <div className="hero hero--sm hero--purple">
             <div className="container">
-              <h1 className="hero-title" style={{fontSize:26}}>Seguros MAPFRE Digital</h1>
+              <h1 className="hero-title hero-title--sm">Seguros MAPFRE Digital</h1>
               <p className="hero-subtitle">Encuentra la protección que necesitas con los mejores precios</p>
             </div>
           </div>
@@ -99,22 +99,22 @@ export default function SegurosTab() {
             </div>
             <div className="grid-3">
               {INSURANCE_PRODUCTS.map(p => (
-                <div key={p.id} className="policy-card">
-                  <div style={{height:4,borderRadius:'4px 4px 0 0',background:CATEGORY_COLORS[p.category]||'#8B5CF6'}}/>
-                  <div className="policy-card-body">
+                <div key={p.id} className="product-card">
+                  <div className="product-card-accent" style={{background:CATEGORY_COLORS[p.category]||'var(--c-secondary)'}}/>
+                  <div className="product-card-body">
                     <div className="flex justify-between items-start mb-3">
                       <div>
                         <span className="badge badge--neutral text-xs">{CATEGORY_LABELS[p.category]||p.category}</span>
-                        <div style={{fontFamily:'var(--f-display)',fontSize:18,fontWeight:700,marginTop:'var(--sp-2)'}}>{p.name}</div>
+                        <div className="font-display font-bold text-lg mt-2">{p.name}</div>
                         <div className="text-sm text-2">{p.description}</div>
                       </div>
                       <div style={{textAlign:'right',flexShrink:0,marginLeft:'var(--sp-3)'}}>
-                        <div style={{fontFamily:'var(--f-display)',fontSize:24,fontWeight:800,color:CATEGORY_COLORS[p.category]||'#8B5CF6'}}>{p.basePrice}€</div>
+                        <div className="price-display price-display--lg price-display--purple">{p.basePrice}€</div>
                         <div className="text-xs text-2">/ mes</div>
                       </div>
                     </div>
                     <ul className="list-none mb-4">
-                      {p.coverages.slice(0,3).map(c=><li key={c} className="text-sm py-1"> {c}</li>)}
+                      {p.coverages.slice(0,3).map(c=><li key={c} className="text-sm py-1">{c}</li>)}
                     </ul>
                     <div className="flex gap-2">
                       <button className="btn btn--secondary btn--sm btn--full" onClick={()=>startQuote(p)}>Calcular precio</button>
@@ -136,9 +136,9 @@ export default function SegurosTab() {
           <div className="page" style={{maxWidth:680}}>
             <button className="btn btn--ghost text-sm mb-6" onClick={()=>setQuote(q=>({...q,step:'config'}))}>← Volver a configurar</button>
             <div className="card mb-6">
-              <div className="card-header" style={{background:`linear-gradient(90deg,#5B21B6,#7C3AED)`,color:'#fff'}}>
-                <span className="card-title" style={{color:'#fff'}}>Cotización personalizada — {p.name}</span>
-                <span className="badge" style={{background:'rgba(255,255,255,.15)',color:'#fff'}}>Válida 48h</span>
+              <div className="card-header card-header--purple">
+                <span className="card-title">Cotización personalizada — {p.name}</span>
+                <span className="badge badge--neutral">Válida 48h</span>
               </div>
               <div className="card-body">
                 <div className="flex justify-between mb-3">
@@ -166,7 +166,7 @@ export default function SegurosTab() {
                 <div className="divider"/>
                 <div className="flex justify-between items-center">
                   <span className="font-bold text-lg">Precio final/mes</span>
-                  <span style={{fontFamily:'var(--f-display)',fontSize:30,fontWeight:800,color:'#8B5CF6'}}>{finalPrice.toFixed(2)}€</span>
+                  <span className="price-display price-display--lg price-display--purple">{finalPrice.toFixed(2)}€</span>
                 </div>
                 {totalDiscount > 50 && (
                   <div className="alert alert--warning mt-4"><span className="alert-icon"></span>Descuento acumulado: {totalDiscount}%. ¡Precio especial aplicado!</div>
@@ -181,7 +181,7 @@ export default function SegurosTab() {
                   <input className="form-input" placeholder="Introduce código promocional" value={quote.promoInput} onChange={e=>setQuote(q=>({...q,promoInput:e.target.value}))} onKeyDown={e=>e.key==='Enter'&&applyPromo()} />
                   <button className="btn btn--secondary" onClick={applyPromo}>Aplicar</button>
                 </div>
-                {promoError && <p className="text-sm" style={{color:'var(--c-danger)'}}>{promoError}</p>}
+                {promoError && <p className="text-sm text-danger">{promoError}</p>}
                 {promoSuccess && <p className="text-sm text-success">{promoSuccess}</p>}
               </div>
             </div>
@@ -196,7 +196,7 @@ export default function SegurosTab() {
             <div className="card">
               <div className="card-header">
                 <span className="card-title">Configurar cotización — {p.name}</span>
-                <span style={{fontFamily:'var(--f-display)',fontSize:22,fontWeight:800,color:'#8B5CF6'}}>{p.basePrice}€/mes base</span>
+                <span className="price-display price-display--purple" style={{fontSize:22}}>{p.basePrice}€/mes base</span>
               </div>
               <div className="card-body">
                 <div className="form-group">
@@ -232,7 +232,7 @@ export default function SegurosTab() {
                     <input className="form-input" placeholder="Ej: VERANO26" value={quote.promoInput} onChange={e=>setQuote(q=>({...q,promoInput:e.target.value}))} onKeyDown={e=>e.key==='Enter'&&applyPromo()} />
                     <button className="btn btn--outline" onClick={applyPromo}>Aplicar</button>
                   </div>
-                  {promoError && <p className="text-sm mt-1" style={{color:'var(--c-danger)'}}>{promoError}</p>}
+                  {promoError && <p className="text-sm mt-1 text-danger">{promoError}</p>}
                   {promoSuccess && <p className="text-sm mt-1 text-success">{promoSuccess}</p>}
                   {quote.appliedCodes.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-2">
@@ -244,7 +244,7 @@ export default function SegurosTab() {
                 <div className="divider"/>
                 <div className="flex justify-between items-center mb-5">
                   <span className="font-bold text-lg">Estimación mensual</span>
-                  <span style={{fontFamily:'var(--f-display)',fontSize:28,fontWeight:800,color:'#8B5CF6'}}>{finalPrice.toFixed(2)}€</span>
+                  <span className="price-display price-display--lg price-display--purple">{finalPrice.toFixed(2)}€</span>
                 </div>
                 <button className="btn btn--secondary btn--full btn--lg" onClick={()=>setQuote(q=>({...q,step:'resultado'}))}>Ver cotización detallada →</button>
               </div>

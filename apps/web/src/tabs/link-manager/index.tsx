@@ -82,17 +82,17 @@ export default function LinkManagerTab() {
     switch (view) {
       case 'perfil': return (
         <div>
-          <div style={{background:'linear-gradient(135deg,#831843,#BE185D)',color:'#fff',padding:'var(--sp-8) var(--sp-6)'}}>
+          <div className="hero hero--sm" style={{background:'linear-gradient(135deg,#831843,#BE185D)'}}>
             <div className="container flex items-center gap-6 flex-wrap">
               <div className="avatar" style={{width:72,height:72,fontSize:24,background:'rgba(255,255,255,.2)',flexShrink:0}}>AE</div>
               <div>
-                <h1 className="hero-title" style={{fontSize:24,marginBottom:4}}>Alejandro Estévez</h1>
+                <h1 className="hero-title hero-title--sm" style={{marginBottom:4}}>Alejandro Estévez</h1>
                 <p className="hero-subtitle" style={{fontSize:13}}>@alejandro_e · Ingeniero de Software · Madrid</p>
                 <div className="flex gap-3 mt-3">
                   {[{l:'Links',v:links.filter(l=>l.userId===CURRENT_USER_ID).length},{l:'Clicks',v:ANALYTICS_DATA.totalClicks},{l:'Sugerencias IA',v:AI_SUGGESTIONS.length}].map(s=>(
                     <div key={s.l} style={{textAlign:'center'}}>
-                      <div style={{fontFamily:'var(--f-display)',fontSize:22,fontWeight:800}}>{s.v}</div>
-                      <div style={{fontSize:11,opacity:.7}}>{s.l}</div>
+                      <div className="price-display" style={{fontSize:22}}>{s.v}</div>
+                      <div className="text-xs" style={{opacity:.7}}>{s.l}</div>
                     </div>
                   ))}
                 </div>
@@ -129,7 +129,7 @@ export default function LinkManagerTab() {
       case 'mis-links': return (
         <div className="page">
           <div className="page-header">
-            <h1 className="section-title" style={{marginBottom:0}}>Mis Links</h1>
+              <h1 className="section-title text-base mb-0">Mis Links</h1>
             <button className="btn btn--pink" onClick={()=>{setShowForm(true);setEditingLink(null)}}>Nuevo link</button>
           </div>
 
@@ -207,7 +207,7 @@ export default function LinkManagerTab() {
             <div>
               <h1 className="section-title" style={{marginBottom:4}}>Asistente IA de Contenido</h1>
               <div className="flex items-center gap-2">
-                <div style={{width:8,height:8,background: aiModel==='gemma'?'#16A34A':'#D97706',borderRadius:'50%'}}/>
+                <div style={{width:8,height:8,background: aiModel==='gemma'?'var(--c-success)':'var(--c-warning)',borderRadius:'50%'}}/>
                 <span className="text-xs text-2">{aiModel==='gemma'?'Gemma 2:2b (Ollama local)':aiModel==='fallback'?'Modo offline — reglas estáticas':'Esperando consulta'}</span>
               </div>
             </div>

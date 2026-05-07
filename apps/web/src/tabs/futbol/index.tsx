@@ -70,7 +70,7 @@ export default function FutbolTab() {
     const cat = selectedMatch.categories[selectedCategory]
     return (
       <div style={{ background: '#F9FAFB', minHeight: '100%' }}>
-        <div style={{ background: 'linear-gradient(135deg,#16A34A,#15803D)', color:'#fff', padding:'var(--sp-8) var(--sp-6)' }}>
+      <div className="hero hero--sm hero--green">
           <div className="container">
             <button className="btn btn--ghost" style={{color:'#fff',marginBottom:'var(--sp-4)'}} onClick={() => { setView('partidos'); const p=new URLSearchParams(window.location.search); p.delete('match'); window.history.replaceState({},'',`?${p.toString()}`) }}>
               ← Volver a partidos
@@ -78,14 +78,14 @@ export default function FutbolTab() {
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div>
                 <div className="flex items-center gap-3 mb-2">
-                  <span style={{fontSize:13,background:'rgba(255,255,255,.15)',padding:'3px 10px',borderRadius:'var(--r-full)'}}>{selectedMatch.competition}</span>
-                  {selectedMatch.sociOnly && <span style={{fontSize:12,background:'#FEF3C7',color:'#92400E',padding:'3px 10px',borderRadius:'var(--r-full)',fontWeight:600}}>Exclusivo Socios</span>}
+                  <span className="badge badge--neutral">{selectedMatch.competition}</span>
+                  {selectedMatch.sociOnly && <span className="badge badge--warning">Exclusivo Socios</span>}
                 </div>
-                <h1 style={{fontFamily:'var(--f-display)',fontSize:28,fontWeight:800,marginBottom:'var(--sp-2)'}}>
+                <h1 className="hero-title" style={{marginBottom:'var(--sp-2)'}}>
                   {selectedMatch.homeTeam} <span style={{opacity:.6}}>vs</span> {selectedMatch.awayTeam}
                 </h1>
-                <p style={{color:'rgba(255,255,255,.8)',fontSize:15}}>
-                  {new Date(selectedMatch.date).toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'})} · {selectedMatch.time}h &nbsp;|&nbsp; ️ {selectedMatch.stadium}, {selectedMatch.city}
+                <p className="hero-subtitle">
+                  {new Date(selectedMatch.date).toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'})} · {selectedMatch.time}h &nbsp;|&nbsp; {selectedMatch.stadium}, {selectedMatch.city}
                 </p>
               </div>
               {statusBadge(selectedMatch.status)}
@@ -93,22 +93,22 @@ export default function FutbolTab() {
           </div>
         </div>
 
-        <div className="container" style={{padding:'var(--sp-8) var(--sp-6)'}}>
-          <div className="grid-2" style={{gap:'var(--sp-6)'}}>
+        <div className="container page">
+          <div className="grid-2">
             <div>
-              <h2 className="section-title" style={{fontSize:18}}>Selecciona tu categoría</h2>
+              <h2 className="section-title text-base mb-4">Selecciona tu categoría</h2>
               {selectedMatch.categories.map((c, i) => (
                 <div key={i} onClick={() => { if(c.available>0) setSelectedCategory(i) }}
                   style={{ padding:'var(--sp-4)', marginBottom:'var(--sp-3)', borderRadius:'var(--r-lg)', cursor: c.available>0?'pointer':'not-allowed',
-                    border: selectedCategory===i ? '2px solid #16A34A':'1px solid var(--c-border)',
+                    border: selectedCategory===i ? '2px solid var(--c-success)':'1px solid var(--c-border)',
                     background: selectedCategory===i ? '#F0FDF4':'#fff', opacity: c.available===0?.5:1 }}>
                   <div className="flex justify-between items-center">
                     <div>
-                      <div className="font-semibold" style={{fontSize:15}}>{c.name}</div>
+                      <div className="font-semibold text-sm">{c.name}</div>
                       <div className="text-2 text-sm">{c.description}</div>
                     </div>
                     <div style={{textAlign:'right'}}>
-                      <div style={{fontFamily:'var(--f-display)',fontSize:22,fontWeight:800,color:'#16A34A'}}>{c.price}€</div>
+                      <div className="price-display price-display--primary" style={{fontSize:22}}>{c.price}€</div>
                       <div className="text-xs text-2">{c.available > 0 ? `${c.available} disp.` : 'Agotado'}</div>
                     </div>
                   </div>
@@ -123,7 +123,7 @@ export default function FutbolTab() {
                   <label className="form-label">Número de entradas</label>
                   <div className="flex items-center gap-3">
                     <button className="btn btn--outline btn--sm" onClick={() => setQty(q=>Math.max(1,q-1))}>−</button>
-                    <span style={{fontSize:20,fontWeight:700,minWidth:32,textAlign:'center'}}>{qty}</span>
+                    <span style={{fontSize:20,fontWeight:700,minWidth:32,textAlign:'center'}} className="font-display">{qty}</span>
                     <button className="btn btn--outline btn--sm" onClick={() => setQty(q=>Math.min(8,q+1))}>+</button>
                     <span className="text-sm text-2">(máx. 8 por compra)</span>
                   </div>
@@ -133,9 +133,9 @@ export default function FutbolTab() {
                 <div className="flex justify-between mb-2"><span className="text-sm text-2">Cantidad</span><span className="font-semibold">x{qty}</span></div>
                 <div className="flex justify-between mb-4"><span className="text-sm text-2">Gastos de gestión</span><span className="font-semibold">2.50€</span></div>
                 <div className="divider" />
-                <div className="flex justify-between" style={{marginBottom:'var(--sp-5)'}}>
+                <div className="flex justify-between mb-4">
                   <span className="font-bold text-lg">Total</span>
-                  <span style={{fontFamily:'var(--f-display)',fontSize:24,fontWeight:800,color:'#16A34A'}}>{(cat.price*qty+2.5).toFixed(2)}€</span>
+                  <span className="price-display price-display--lg price-display--primary">{(cat.price*qty+2.5).toFixed(2)}€</span>
                 </div>
 
                 <div className="flex items-center gap-2 mb-3 p-4" style={{background:'#EFF6FF',borderRadius:'var(--r-md)'}}>

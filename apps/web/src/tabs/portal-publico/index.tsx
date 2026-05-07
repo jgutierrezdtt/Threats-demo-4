@@ -65,13 +65,10 @@ export default function PortalPublicoTab() {
 
   if (view === 'inicio') return (
     <div>
-      <div style={{background:'linear-gradient(135deg,#0E7490,#0891B2)',color:'#fff',padding:'var(--sp-10) var(--sp-6)'}}>
+      <div className="hero hero--teal" style={{padding:'var(--sp-10) var(--sp-6)'}}>
         <div className="container" style={{maxWidth:800,textAlign:'center'}}>
-          <div style={{fontSize:48,marginBottom:'var(--sp-4)'}}>️</div>
-          <h1 style={{fontFamily:'var(--f-display)',fontSize:32,fontWeight:800,marginBottom:'var(--sp-3)'}}>
-            Sede Electrónica · Portal de Títulos Académicos
-          </h1>
-          <p style={{fontSize:16,opacity:.8,marginBottom:'var(--sp-8)'}}>
+          <h1 className="hero-title">Sede Electrónica · Portal de Títulos Académicos</h1>
+          <p className="hero-subtitle" style={{margin:'0 auto var(--sp-8)',textAlign:'center'}}>
             Ministerio de Educación, Formación Profesional y Deportes<br/>
             Verificación y consulta de títulos universitarios y certificados
           </p>
@@ -88,8 +85,8 @@ export default function PortalPublicoTab() {
             {title:'Expediente académico',desc:'Accede a tu expediente completo con todas las titulaciones registradas.'},
             {title:'Firma electrónica',desc:'Documentos con validez legal emitidos con firma electrónica reconocida.'},
           ].map(f=>(
-            <div key={f.title} className="card" style={{textAlign:'center',padding:'var(--sp-6)'}}>
-              <div style={{fontFamily:'var(--f-display)',fontSize:17,fontWeight:700,marginBottom:'var(--sp-2)'}}>{f.title}</div>
+            <div key={f.title} className="card p-6" style={{textAlign:'center'}}>
+              <div className="font-display font-bold text-base mb-2">{f.title}</div>
               <p className="text-sm text-2">{f.desc}</p>
             </div>
           ))}
@@ -101,8 +98,7 @@ export default function PortalPublicoTab() {
   if (view === 'login') return (
     <div className="page" style={{maxWidth:440,margin:'0 auto'}}>
       <div style={{textAlign:'center',marginBottom:'var(--sp-6)'}}>
-        <div style={{fontSize:36}}>️</div>
-        <h1 style={{fontFamily:'var(--f-display)',fontSize:22,fontWeight:700}}>Acceso ciudadano</h1>
+        <h1 className="font-display font-bold text-xl">Acceso ciudadano</h1>
         <p className="text-sm text-2">Introduce tu DNI/NIE para acceder a tu expediente</p>
       </div>
       <div className="card">
@@ -116,7 +112,7 @@ export default function PortalPublicoTab() {
             <input className="form-input" type="password" placeholder="••••••••" value={loginForm.password} onChange={e=>setLoginForm(f=>({...f,password:e.target.value}))} onKeyDown={e=>e.key==='Enter'&&doLogin()} />
           </div>
           {loginError && <div className="alert alert--error mb-4"><span className="alert-icon"></span>{loginError}</div>}
-          <button className="btn btn--full btn--lg" style={{background:'#0891B2',color:'#fff'}} onClick={doLogin} disabled={!loginForm.dni}>Acceder</button>
+          <button className="btn btn--full btn--lg btn--primary" onClick={doLogin} disabled={!loginForm.dni}>Acceder</button>
           <div className="divider"/>
           <div className="flex justify-between text-sm">
             <button className="btn btn--ghost btn--sm" onClick={()=>setView('registro')}>Registrarme</button>
@@ -134,7 +130,7 @@ export default function PortalPublicoTab() {
   if (view === 'registro') return (
     <div className="page" style={{maxWidth:520,margin:'0 auto'}}>
       <button className="btn btn--ghost btn--sm mb-6" onClick={()=>setView('inicio')}>← Volver</button>
-      <h1 style={{fontFamily:'var(--f-display)',fontSize:22,fontWeight:700,marginBottom:'var(--sp-6)'}}>️ Registro ciudadano</h1>
+      <h1 className="font-display font-bold text-xl mb-6">Registro ciudadano</h1>
       {regDone
         ? <div className="alert alert--success"><div><strong>Registro completado.</strong> Ya puedes acceder con tu DNI y contraseña.</div></div>
         : <div className="card">
@@ -169,7 +165,7 @@ export default function PortalPublicoTab() {
               <label className="form-label">Contraseña</label>
               <input className="form-input" type="password" placeholder="Mínimo 8 caracteres" value={regForm.password} onChange={e=>setRegForm(f=>({...f,password:e.target.value}))} />
             </div>
-            <button className="btn btn--full btn--lg" style={{background:'#0891B2',color:'#fff'}} disabled={!regForm.name||!regForm.dni||!regForm.email} onClick={()=>setRegDone(true)}>Completar registro</button>
+            <button className="btn btn--full btn--lg btn--primary" disabled={!regForm.name||!regForm.dni||!regForm.email} onClick={()=>setRegDone(true)}>Completar registro</button>
           </div>
         </div>
       }
@@ -180,12 +176,12 @@ export default function PortalPublicoTab() {
     const myTitles = ACADEMIC_TITLES.filter(t => t.userId === session.id)
     return (
       <div>
-        <div style={{background:'linear-gradient(135deg,#164E63,#0E7490)',color:'#fff',padding:'var(--sp-8) var(--sp-6)'}}>
+        <div className="hero hero--sm hero--teal">
           <div className="container flex justify-between items-center flex-wrap gap-4">
             <div>
-              <p style={{fontSize:12,opacity:.6,marginBottom:4}}>CIUDADANO IDENTIFICADO</p>
-              <h1 style={{fontFamily:'var(--f-display)',fontSize:22,fontWeight:700}}>{session.name}</h1>
-              <p style={{fontSize:13,opacity:.75}}>DNI: {session.dni} · Expediente: {session.expedientNumber}</p>
+              <p className="text-xs" style={{color:'rgba(255,255,255,.6)',marginBottom:4}}>CIUDADANO IDENTIFICADO</p>
+              <h1 className="font-display font-bold text-xl" style={{color:'#fff'}}>{session.name}</h1>
+              <p className="text-sm" style={{color:'rgba(255,255,255,.75)'}}>DNI: {session.dni} · Expediente: {session.expedientNumber}</p>
             </div>
             <button className="btn btn--ghost" style={{color:'rgba(255,255,255,.6)',border:'1px solid rgba(255,255,255,.2)'}} onClick={()=>{setSession(null);setView('inicio')}}>Cerrar sesión</button>
           </div>
@@ -199,7 +195,7 @@ export default function PortalPublicoTab() {
 
           <div className="grid-2">
             <div>
-              <h2 className="section-title" style={{fontSize:17}}>Mis títulos</h2>
+              <h2 className="section-title text-base mb-4">Mis títulos</h2>
               {myTitles.map(t=>(
                 <div key={t.id} className="card mb-3" style={{cursor:'pointer'}} onClick={()=>{setSelectedTitle(t);setView('detalle-titulo')}}>
                   <div className="card-body">
@@ -216,9 +212,9 @@ export default function PortalPublicoTab() {
               ))}
             </div>
             <div>
-              <h2 className="section-title" style={{fontSize:17}}>Acciones</h2>
+              <h2 className="section-title text-base mb-4">Acciones</h2>
               <div className="flex flex-col gap-3">
-                <button className="btn btn--full" style={{background:'#0891B2',color:'#fff'}} onClick={()=>setView('consultar')}>Consultar expediente público</button>
+                <button className="btn btn--primary btn--full" onClick={()=>setView('consultar')}>Consultar expediente público</button>
                 <button className="btn btn--outline btn--full"> Descargar certificado digital</button>
                 <button className="btn btn--outline btn--full">️ Solicitar verificación</button>
               </div>
