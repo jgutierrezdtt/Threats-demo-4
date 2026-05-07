@@ -14,12 +14,13 @@ export default function FutbolTab() {
   const [processing, setProcessing] = useState(false)
   const [newTicket, setNewTicket] = useState<Ticket | null>(null)
 
-  // Leer parámetro de URL para acceso directo a partido
+  // VULNERABILIDAD IDOR: el parámetro ?match= carga cualquier partido sin validar membresía
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const matchId = params.get('match')
     if (matchId) {
       const m = MATCHES.find(m => m.id === matchId)
+      // No se valida m.sociOnly — acceso directo a partidos restringidos vía URL
       if (m) { setSelectedMatch(m); setView('detalle') }
     }
   }, [])
@@ -327,8 +328,8 @@ export default function FutbolTab() {
         <div style={{display:'grid',gap:'var(--sp-4)',marginBottom:'var(--sp-8)'}}>
           {upcoming.map(m => (
             <div key={m.id} className={`match-card${m.sociOnly?' match-card--locked':''}`}
-              onClick={() => !m.sociOnly && goToDetail(m)}
-              style={{ display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:'var(--sp-3)', cursor: m.sociOnly ? 'pointer':'pointer' }}
+              onClick={() => { if (!m.sociOnly) goToDetail(m) }}
+              style={{ display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:'var(--sp-3)', cursor: m.sociOnly ? 'default' : 'pointer' }}
             >
               <div style={{flex:1,minWidth:240}}>
                 <div className="flex items-center gap-2 mb-1">
@@ -343,9 +344,9 @@ export default function FutbolTab() {
               </div>
               <div style={{textAlign:'right',flexShrink:0}}>
                 <div style={{fontSize:11,color:'var(--c-text-2)',marginBottom:4}}>desde</div>
-                <div style={{fontFamily:'var(--f-display)',fontSize:22,fontWeight:800,color:'#16A34A'}}>{Math.min(...m.categories.map(c=>c.price))}€</div>
+                <div style={{fontFamily:'var(--f-display)',fontSize:22,fontWeight:800,color: m.sociOnly ? 'var(--c-text-2)' : '#16A34A'}}>{Math.min(...m.categories.map(c=>c.price))}€</div>
                 {m.sociOnly
-                  ? <button className="btn btn--outline btn--sm mt-2" onClick={e => { e.stopPropagation(); goToDetail(m) }}>Ver evento →</button>
+                  ? <button className="btn btn--outline btn--sm mt-2" onClick={e => { e.stopPropagation(); setView('socio') }}>Acceso socios →</button>
                   : <button className="btn btn--success btn--sm mt-2" onClick={e => { e.stopPropagation(); goToDetail(m) }}>Comprar →</button>
                 }
               </div>
