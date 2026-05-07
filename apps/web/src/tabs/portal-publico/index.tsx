@@ -122,7 +122,7 @@ export default function PortalPublicoTab() {
       </div>
       <div className="alert alert--info mt-4">
         <span className="alert-icon"></span>
-        <div className="text-xs">Para acceder usa cualquier DNI de prueba: <strong>12345678A</strong>, <strong>87654321B</strong>, <strong>11223344C</strong>, <strong>44332211D</strong></div>
+        <div className="text-xs">Para acceder usa cualquier DNI de prueba: <strong>11223344-F</strong>, <strong>22334455-G</strong>, <strong>33445566-H</strong>, <strong>44556677-I</strong></div>
       </div>
     </div>
   )
@@ -240,7 +240,7 @@ export default function PortalPublicoTab() {
           <div className="form-group mb-0">
             <label className="form-label">Expediente, DNI o código de certificado</label>
             <div className="flex gap-3">
-              <input className="form-input" placeholder="Ej: EXP-2026-00001, 12345678A, CERT-UCM-2024-001..." value={searchQuery} onChange={e=>{setSearchQuery(e.target.value);if(e.target.value.length<2)setSearchResults([])}} onKeyDown={e=>e.key==='Enter'&&doSearch()} />
+              <input className="form-input" placeholder="Ej: EXP-2026-00001, 11223344-F, Sofía Morales..." value={searchQuery} onChange={e=>{setSearchQuery(e.target.value);if(e.target.value.length<2)setSearchResults([])}} onKeyDown={e=>e.key==='Enter'&&doSearch()} />
               <button className="btn btn--lg" style={{background:'#0891B2',color:'#fff'}} onClick={doSearch}>Buscar</button>
             </div>
           </div>

@@ -115,9 +115,9 @@ const HINTS: Record<string, Hint> = {
     title: 'IDOR en consulta pública de expedientes académicos',
     steps: [
       'Sin autenticarse, haz clic en "Consultar título público".',
-      'Introduce cualquier nombre, DNI o número de expediente de otro ciudadano — todos son visibles.',
-      'El sistema devuelve el expediente académico completo incluyendo títulos, universidad, año y certificados.',
-      'La autenticación protege el dashboard propio, pero la consulta pública accede a TODOS los registros sin restricción.',
+      'Busca el DNI de otro ciudadano: prueba con 22334455-G, 33445566-H o 44556677-I.',
+      'El sistema devuelve el expediente académico completo — nombre, email, fecha de nacimiento, títulos y certCodes.',
+      'La función doLogin() solo comprueba que el DNI exista, no valida la contraseña — cualquier DNI del sistema permite acceder.',
     ],
     cwe: 'CWE-284 — Improper Access Control',
   },
