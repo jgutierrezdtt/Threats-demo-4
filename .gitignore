@@ -1,0 +1,38 @@
+node_modules/
+dist/
+.env
+.env.local
+.env.*.local
+*.private.md
+*.private.txt
+*.private/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+.terraform.lock.hcl
+terraform.tfvars
+override.tf
+override.tf.json
+
+# IDE
+.DS_Store
+.vscode/
+*.swp
+*.swo
+
+# Build
+apps/web/dist/
+apps/api/dist/
+apps/link-manager/__pycache__/

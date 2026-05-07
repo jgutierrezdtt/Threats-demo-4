@@ -1,0 +1,38 @@
+[
+  {
+    "id": "link-001",
+    "userId": "user-me",
+    "title": "React Official Docs",
+    "url": "https://react.dev",
+    "category": "aprendizaje",
+    "tags": ["react", "frontend", "documentación"],
+    "isPublic": true,
+    "clicks": 42,
+    "aiSuggested": false,
+    "createdAt": "2026-03-01"
+  },
+  {
+    "id": "link-002",
+    "userId": "user-me",
+    "title": "TypeScript Handbook",
+    "url": "https://www.typescriptlang.org/docs/handbook/intro.html",
+    "category": "aprendizaje",
+    "tags": ["typescript", "documentación", "javascript"],
+    "isPublic": true,
+    "clicks": 28,
+    "aiSuggested": false,
+    "createdAt": "2026-03-02"
+  },
+  {
+    "id": "link-003",
+    "userId": "user-b",
+    "title": "Stripe Dashboard",
+    "url": "https://dashboard.stripe.com",
+    "category": "trabajo",
+    "tags": ["pagos", "fintech", "empresa"],
+    "isPublic": false,
+    "clicks": 5,
+    "aiSuggested": false,
+    "createdAt": "2026-02-14"
+  }
+]
