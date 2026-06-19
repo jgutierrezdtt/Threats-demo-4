@@ -3,8 +3,10 @@ import FutbolTab from './tabs/futbol'
 import HospitalTab from './tabs/hospital'
 import SegurosTab from './tabs/seguros'
 import TelcoIaCTab from './tabs/telco-iac'
+import DispositivosTab from './tabs/dispositivos'
 import LinkManagerTab from './tabs/link-manager'
 import PortalPublicoTab from './tabs/portal-publico'
+import { LANGUAGES, type Language, t, useDomTranslations } from './i18n'
 import './index.css'
 
 // Minimal SVG icon set — 16x16 stroked icons, 1.5px stroke
@@ -43,6 +45,13 @@ const Icon = {
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M8 2L1 6l7 4 7-4-7-4z"/>
       <path d="M3.5 8v4a4.5 4.5 0 009 0V8"/>
+    </svg>
+  ),
+  Device: () => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="1.5" width="10" height="13" rx="1.5"/>
+      <path d="M6 4h4M6 7h4M6 10h1.5"/>
+      <circle cx="10" cy="10" r="1"/>
     </svg>
   ),
 }
@@ -90,14 +99,29 @@ const HINTS: Record<string, Hint> = {
   },
   telco: {
     type: 'misconfiguration',
-    title: 'Misconfiguraciones críticas en Terraform IaC',
+    title: 'Laboratorio cloud con fallos encadenados',
     steps: [
-      'Abre la vista "Editor HCL" y revisa compute.tf: SSH (puerto 22) abierto a 0.0.0.0/0.',
-      'En database.tf: la base de datos tiene publicly_accessible = true y skip_final_snapshot = true.',
-      'En iam.tf: el rol tiene Action: "*" y Resource: "*" — privilegios excesivos sin least-privilege.',
-      'En vpc.tf: subnet pública con map_public_ip_on_launch = true y ruta 0.0.0.0/0 al Internet Gateway.',
+      'Empieza por "Cloud Security Lab": cada tarjeta plantea un fallo explotable, no solo una mala práctica en Terraform.',
+      'En SSRF, el objetivo es alcanzar metadata interna en 169.254.169.254 y demostrar impacto con AccessKeyId.',
+      'En S3 y CI/CD, busca exposición de secretos en backups públicos y logs de despliegue.',
+      'En feature flags y webhooks, valida el abuso de confianza en cliente y firmas HMAC con secreto vacío.',
     ],
-    cwe: 'CWE-732 — Incorrect Permission Assignment for Critical Resource',
+    cwe: 'CWE-918 / CWE-200 / CWE-347 — Cloud Attack Path',
+  },
+  devices: {
+    type: 'business-logic',
+    title: 'Revisión de controles en consola de dispositivos médicos',
+    steps: [
+      'Empieza en Vista de flota: identifica DEV-INF-0188, que ya muestra una tasa de 42 / 35 ml/h y una calibración vencida.',
+      'Cambia el Perfil activo a Ingeniería biomédica o Administrador de servicio y observa si la aplicación pide autenticación real o solo cambia el rol en cliente.',
+      'Abre DEV-INF-0188 y entra en Control de terapia: registra una tasa superior al máximo recomendado, por ejemplo 55 ml/h.',
+      'Comprueba si el cambio queda activo aunque falte la doble validación clínica; la evidencia es que la orden pasa a Activa y el equipo queda en Alarma.',
+      'En Mantenimiento, pulsa Mover +90 días sobre un equipo con calibración vencida y revisa si el sistema exige justificación o bloqueo de seguridad.',
+      'En Avisos de seguridad, cierra FSN-2026-041 aunque tenga dispositivos abiertos; el fallo está en permitir cerrar el aviso sin conciliación de equipos.',
+      'En Paquete de soporte, cambia la ruta por ../.env o configs/../../.env para comprobar si la exportación devuelve configuración sensible.',
+      'Termina en Registro de auditoría: las acciones aparecen registradas, pero no hay rechazo, coaprobación ni control servidor antes de aplicar cambios críticos.',
+    ],
+    cwe: 'CWE-840 / CWE-862 / CWE-22 — Lógica funcional crítica y validación de rutas',
   },
   links: {
     type: 'exposure',
@@ -139,11 +163,21 @@ const HINT_TYPE_LABEL: Record<Hint['type'], string> = {
   'exposure': 'Exposición de datos',
 }
 
+const DEVICE_HINT_GROUPS: Record<number, string> = {
+  0: 'Preparación',
+  2: 'Terapia',
+  4: 'Mantenimiento',
+  5: 'Avisos',
+  6: 'Soporte',
+  7: 'Auditoría',
+}
+
 const TABS = [
   { id: 'futbol',   label: 'Entradas Fútbol',        IconComp: Icon.Ticket,   accentColor: '#16A34A' },
   { id: 'hospital', label: 'Portal Sanitario',         IconComp: Icon.Hospital, accentColor: '#3B82F6' },
   { id: 'seguros',  label: 'Seguros',                  IconComp: Icon.Shield,   accentColor: '#8B5CF6' },
   { id: 'telco',    label: 'Infraestructura Telco',    IconComp: Icon.Cloud,    accentColor: '#D97706' },
+  { id: 'devices',  label: 'Dispositivos Médicos',     IconComp: Icon.Device,   accentColor: '#0EA5E9' },
   { id: 'links',    label: 'Gestor de Publicaciones',  IconComp: Icon.Link,     accentColor: '#EC4899' },
   { id: 'portal',   label: 'Registro y Títulos',       IconComp: Icon.Academic, accentColor: '#06B6D4' },
 ] as const
@@ -151,12 +185,22 @@ const TABS = [
 type TabId = typeof TABS[number]['id']
 
 export default function App() {
+  const [language, setLanguage] = useState<Language>(() => {
+    const stored = window.localStorage.getItem('platformsuite-language')
+    return stored === 'en' || stored === 'de' || stored === 'es' ? stored : 'es'
+  })
   const [activeTab, setActiveTab] = useState<TabId>(() => {
     const params = new URLSearchParams(window.location.search)
     const t = params.get('tab') as TabId
     return TABS.find(tab => tab.id === t) ? t : 'futbol'
   })
   const [showHint, setShowHint] = useState(false)
+
+  useDomTranslations(language)
+
+  useEffect(() => {
+    window.localStorage.setItem('platformsuite-language', language)
+  }, [language])
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -171,6 +215,7 @@ export default function App() {
       case 'hospital': return <HospitalTab />
       case 'seguros':  return <SegurosTab />
       case 'telco':    return <TelcoIaCTab />
+      case 'devices':  return <DispositivosTab language={language} />
       case 'links':    return <LinkManagerTab />
       case 'portal':   return <PortalPublicoTab />
     }
@@ -192,6 +237,21 @@ export default function App() {
           <span className="header-version">Enterprise v2.4</span>
         </div>
         <div className="header-right">
+          <div className="language-switch" aria-label={t('Idioma', language)}>
+            <span className="language-switch__label">{t('Idioma', language)}</span>
+            {LANGUAGES.map(lang => (
+              <button
+                key={lang.code}
+                type="button"
+                className={`language-switch__btn${language === lang.code ? ' language-switch__btn--active' : ''}`}
+                onClick={() => setLanguage(lang.code)}
+                aria-pressed={language === lang.code}
+                title={lang.label}
+              >
+                {lang.shortLabel}
+              </button>
+            ))}
+          </div>
           <span className="header-env">PRE-PROD</span>
           <div className="header-user-pill">
             <div className="header-avatar">A</div>
@@ -211,7 +271,7 @@ export default function App() {
             onClick={() => setActiveTab(tab.id)}
           >
             <span className="tab-icon" aria-hidden="true"><tab.IconComp /></span>
-            <span className="tab-label">{tab.label}</span>
+            <span className="tab-label">{t(tab.label, language)}</span>
           </button>
         ))}
       </nav>
@@ -238,32 +298,37 @@ export default function App() {
                   <circle cx="9" cy="5.5" r=".75" fill={hintColors.text} stroke="none"/>
                 </svg>
                 <div>
-                  <div className="hint-panel-label" style={{ color: hintColors.text }}>Pista de vulnerabilidad</div>
-                  <div className="hint-panel-title" style={{ color: hintColors.text }}>{hint.title}</div>
+                  <div className="hint-panel-label" style={{ color: hintColors.text }}>{t('Pista de vulnerabilidad', language)}</div>
+                  <div className="hint-panel-title" style={{ color: hintColors.text }}>{t(hint.title, language)}</div>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <span className={`badge ${hintColors.badge}`}>{HINT_TYPE_LABEL[hint.type]}</span>
-                <button className="hint-close" onClick={() => setShowHint(false)} aria-label="Cerrar pista">
+                <span className={`badge ${hintColors.badge}`}>{t(HINT_TYPE_LABEL[hint.type], language)}</span>
+                <button className="hint-close" onClick={() => setShowHint(false)} aria-label={t('Cerrar pista', language)}>
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                     <line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/>
                   </svg>
                 </button>
               </div>
             </div>
-            <ol className="hint-steps">
+            <div className="hint-panel-body">
+              <ol className={`hint-steps${hint.steps.length > 5 ? ' hint-steps--grouped' : ''}`}>
               {hint.steps.map((s, i) => (
                 <li key={i} className="hint-step">
+                  {activeTab === 'devices' && DEVICE_HINT_GROUPS[i] && (
+                    <span className="hint-step-group">{t(DEVICE_HINT_GROUPS[i], language)}</span>
+                  )}
                   <span className="hint-step-num">{i + 1}</span>
-                  <span>{s}</span>
+                  <span>{t(s, language)}</span>
                 </li>
               ))}
-            </ol>
-            <div className="hint-cwe" style={{ color: hintColors.text }}>
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                <path d="M6 1v4l2 2"/><circle cx="6" cy="6" r="5"/>
-              </svg>
-              {hint.cwe}
+              </ol>
+              <div className="hint-cwe" style={{ color: hintColors.text }}>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                  <path d="M6 1v4l2 2"/><circle cx="6" cy="6" r="5"/>
+                </svg>
+                {t(hint.cwe, language)}
+              </div>
             </div>
           </div>
         </div>
@@ -274,15 +339,15 @@ export default function App() {
         className={`hint-fab${showHint ? ' hint-fab--active' : ''}`}
         style={{ '--hint-accent': active.accentColor } as React.CSSProperties}
         onClick={() => setShowHint(v => !v)}
-        title="Mostrar pista de vulnerabilidad"
-        aria-label="Mostrar pista de vulnerabilidad"
+        title={t('Mostrar pista de vulnerabilidad', language)}
+        aria-label={t('Mostrar pista de vulnerabilidad', language)}
       >
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="10" cy="10" r="9"/>
           <path d="M7.5 7.5a2.5 2.5 0 115 0c0 1.5-2.5 2-2.5 3.5"/>
           <circle cx="10" cy="15" r=".8" fill="currentColor" stroke="none"/>
         </svg>
-        <span>Pista</span>
+        <span>{t('Pista', language)}</span>
       </button>
     </div>
   )

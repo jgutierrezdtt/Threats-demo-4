@@ -1,55 +1,49 @@
-# Threats-demo-4
+# Threats Demo
 
-## Ejecución en local
+## Requisitos
 
-### Requisitos
+- Node.js 20+
+- npm
+- Docker Desktop, solo si se quiere levantar con contenedores
 
-- Node.js 20+ y npm
-- Python 3.11+ (solo si quieres levantar `apps/link-manager`)
-- Opcional: Ollama en `http://localhost:11434` para probar las sugerencias IA con Gemma
-
-### Instalación
+## Levantar en local
 
 ```bash
 npm install
 npm run install:all
-```
-
-### Arranque del frontend y la API
-
-Desde la raíz del repositorio:
-
-```bash
 npm run dev
 ```
 
-Esto levanta:
+La aplicación queda disponible en:
 
-- Web en `http://localhost:5173`
-- API en `http://localhost:3001`
+- Web: `http://localhost:5173`
+- API: `http://localhost:3001`
 
-Si prefieres arrancarlos por separado:
+## Levantar por separado
 
 ```bash
 npm run dev:web
 npm run dev:api
 ```
 
-### Servicio Python opcional
-
-Si quieres ejecutar el servicio `link-manager`:
+## Levantar con Docker
 
 ```bash
-cd apps/link-manager
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-python main.py
+npm run docker:up
 ```
 
-Quedará disponible en `http://localhost:8000`.
+La aplicación queda disponible en:
 
-### Build
+- Web: `http://localhost:8080`
+- API: `http://localhost:3001`
+
+Para detener los contenedores:
+
+```bash
+npm run docker:down
+```
+
+## Generar build
 
 ```bash
 npm run build

@@ -7,7 +7,9 @@
     "dev:web": "npm --prefix apps/web run dev",
     "dev:api": "npm --prefix apps/api run dev",
     "build": "npm --prefix apps/web run build",
-    "install:all": "npm --prefix apps/web install && npm --prefix apps/api install"
+    "install:all": "npm --prefix apps/web install && npm --prefix apps/api install",
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

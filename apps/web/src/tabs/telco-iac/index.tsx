@@ -1,12 +1,116 @@
 import { useState, useRef } from 'react'
 import { INFRA_COMPONENTS, TF_FILES, PLAN_OUTPUT_LINES, APPLY_OUTPUT_LINES, type InfraComponent } from '../../data/infrastructure'
 
-type View = 'dashboard' | 'editor' | 'plan' | 'apply' | 'recursos'
+type View = 'ejercicios' | 'dashboard' | 'editor' | 'plan' | 'apply' | 'recursos'
+type ExerciseId = 'ssrf' | 'backup' | 'cicd' | 'feature-flag' | 'webhook'
+
+interface CloudExercise {
+  id: ExerciseId
+  title: string
+  level: string
+  objective: string
+  scenario: string
+  entryPoint: string
+  steps: string[]
+  evidence: string
+  keyword: string
+  hint: string
+}
 
 const TF_FILE_KEYS = Object.keys(TF_FILES) as (keyof typeof TF_FILES)[]
+const CLOUD_EXERCISES: CloudExercise[] = [
+  {
+    id: 'ssrf',
+    title: 'SSRF a metadata cloud',
+    level: 'Intermedio',
+    objective: 'Demuestra que el preview de URLs puede alcanzar la metadata interna de la instancia.',
+    scenario: 'El portal TelcoCore permite previsualizar URLs para generar tarjetas de estado. El backend no restringe destinos internos.',
+    entryPoint: 'URL Preview: https://status.telcocore.local/preview?url=',
+    steps: [
+      'Prueba una URL externa normal para ver el formato de respuesta.',
+      'Cambia el destino a http://169.254.169.254/latest/meta-data/iam/security-credentials/.',
+      'Usa el nombre de rol devuelto para consultar las credenciales temporales.',
+      'Identifica el AccessKeyId como evidencia de impacto.'
+    ],
+    evidence: 'AccessKeyId',
+    keyword: 'accesskeyid',
+    hint: 'La IP 169.254.169.254 no sale a Internet: solo responde desde la propia instancia cloud.'
+  },
+  {
+    id: 'backup',
+    title: 'Backup S3 expuesto',
+    level: 'Básico',
+    objective: 'Encuentra un backup publicado por error y extrae un secreto de configuración.',
+    scenario: 'El Terraform crea buckets con nombres predecibles para artefactos y copias de seguridad. Uno de ellos permite lectura pública.',
+    entryPoint: 'Bucket: telco-backups-preprod',
+    steps: [
+      'Enumera rutas habituales: /backups, /exports, /db, /releases.',
+      'Localiza el archivo customer-db-2026-05.sql.gz.',
+      'Busca variables tipo DB_PASSWORD, API_SECRET o STRIPE_WEBHOOK_SECRET.',
+      'Entrega el nombre del secreto encontrado como evidencia.'
+    ],
+    evidence: 'API_SECRET',
+    keyword: 'api_secret',
+    hint: 'Los backups comprimidos suelen seguir siendo texto buscable después de descomprimirlos.'
+  },
+  {
+    id: 'cicd',
+    title: 'Secretos en logs CI/CD',
+    level: 'Básico',
+    objective: 'Localiza un token filtrado en logs de despliegue y explica qué permiso concede.',
+    scenario: 'El pipeline imprime variables de entorno para depurar un fallo de Terraform apply.',
+    entryPoint: 'Deploy logs: run-4821-preprod',
+    steps: [
+      'Abre el log de despliegue fallido.',
+      'Busca líneas con export, token, password, secret o Authorization.',
+      'Identifica el token ghp_ de la cuenta de despliegue.',
+      'Relaciona el token con permisos de escritura sobre releases.'
+    ],
+    evidence: 'ghp_',
+    keyword: 'ghp_',
+    hint: 'Un token no necesita estar completo en pantalla para demostrar filtrado: el prefijo y el contexto ya son evidencia.'
+  },
+  {
+    id: 'feature-flag',
+    title: 'Panel admin por feature flag',
+    level: 'Intermedio',
+    objective: 'Activa una función interna modificando estado de cliente y accede al panel de administración.',
+    scenario: 'La app oculta herramientas internas con feature flags en localStorage, pero el servidor no revalida el rol.',
+    entryPoint: 'localStorage: telco.flags',
+    steps: [
+      'Inspecciona el estado local del navegador.',
+      'Activa adminConsole=true y reload.',
+      'Abre /admin/iac/rollback desde la navegación interna.',
+      'Demuestra que aparece el botón Rollback PRE-PROD.'
+    ],
+    evidence: 'Rollback PRE-PROD',
+    keyword: 'rollback',
+    hint: 'Ocultar controles en frontend no equivale a autorizar acciones en backend.'
+  },
+  {
+    id: 'webhook',
+    title: 'Bypass de firma webhook',
+    level: 'Avanzado',
+    objective: 'Modifica una notificación de pago porque la firma se calcula con un secreto vacío.',
+    scenario: 'El Terraform define redis_auth_token vacío y el servicio de billing reutiliza esa variable como fallback para validar webhooks.',
+    entryPoint: 'POST /billing/webhooks/provider',
+    steps: [
+      'Envía un webhook legítimo con amount=19.90.',
+      'Repite la petición con amount=0.01 y status=paid.',
+      'Genera la firma HMAC usando cadena vacía como secreto.',
+      'Confirma que la factura queda marcada como paid.'
+    ],
+    evidence: 'invoice.status=paid',
+    keyword: 'paid',
+    hint: 'Si el secreto es cadena vacía, cualquiera puede reproducir la firma esperada.'
+  }
+]
 
 export default function TelcoIaCTab() {
-  const [view, setView] = useState<View>('dashboard')
+  const [view, setView] = useState<View>('ejercicios')
+  const [selectedExercise, setSelectedExercise] = useState<ExerciseId>('ssrf')
+  const [evidenceInput, setEvidenceInput] = useState('')
+  const [exerciseResult, setExerciseResult] = useState<'idle' | 'ok' | 'fail'>('idle')
   const [selectedFile, setSelectedFile] = useState<keyof typeof TF_FILES>('main.tf')
   const [planRunning, setPlanRunning] = useState(false)
   const [planLines, setPlanLines] = useState<{type:string;text:string}[]>([])
@@ -22,6 +126,13 @@ export default function TelcoIaCTab() {
   const statusBadge = (s: InfraComponent['status']) => {
     const map: Record<string,string> = {running:'success',degraded:'warning',error:'danger',deploying:'info',stopped:'neutral'}
     return <span className={`badge badge--${map[s]||'neutral'}`}>{s}</span>
+  }
+
+  const currentExercise = CLOUD_EXERCISES.find(e => e.id === selectedExercise)!
+
+  const validateEvidence = () => {
+    const normalized = evidenceInput.toLowerCase()
+    setExerciseResult(normalized.includes(currentExercise.keyword) ? 'ok' : 'fail')
   }
 
   const runPlan = async () => {
@@ -47,6 +158,120 @@ export default function TelcoIaCTab() {
 
   const renderContent = () => {
     switch (view) {
+      case 'ejercicios': return (
+        <div>
+          <div className="hero hero--sm" style={{background:'linear-gradient(135deg,#78350F,#B45309)'}}>
+            <div className="container">
+              <div className="flex justify-between items-center flex-wrap gap-4">
+                <div>
+                  <h1 className="hero-title hero-title--sm">Cloud Security Lab</h1>
+                  <p className="hero-subtitle">Ejercicios prácticos sobre fallos cloud nacidos de malas decisiones IaC</p>
+                </div>
+                <div className="flex gap-3">
+                  <div style={{background:'rgba(255,255,255,.1)',padding:'var(--sp-3) var(--sp-4)',borderRadius:'var(--r-md)'}}>
+                    <div className="text-xs" style={{opacity:.7}}>Entorno</div>
+                    <div className="font-semibold">PRE-PROD</div>
+                  </div>
+                  <div style={{background:'rgba(255,255,255,.1)',padding:'var(--sp-3) var(--sp-4)',borderRadius:'var(--r-md)'}}>
+                    <div className="text-xs" style={{opacity:.7}}>Modo</div>
+                    <div className="font-semibold">Guided lab</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="page">
+            <div className="grid-3 mb-8">
+              {CLOUD_EXERCISES.map(exercise => (
+                <button
+                  key={exercise.id}
+                  className="card"
+                  onClick={() => { setSelectedExercise(exercise.id); setExerciseResult('idle'); setEvidenceInput('') }}
+                  style={{
+                    textAlign:'left',
+                    border: selectedExercise === exercise.id ? '2px solid var(--c-warning)' : '1px solid var(--c-border)',
+                    cursor:'pointer'
+                  }}
+                >
+                  <div className="card-body">
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="badge badge--warning">{exercise.level}</span>
+                      <span className="font-mono text-xs text-2">{exercise.id}</span>
+                    </div>
+                    <div className="font-display font-bold text-base mb-2">{exercise.title}</div>
+                    <p className="text-sm text-2">{exercise.objective}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            <div className="grid-2">
+              <div className="card">
+                <div className="card-header">
+                  <div>
+                    <span className="card-title">{currentExercise.title}</span>
+                    <div className="card-subtitle">{currentExercise.objective}</div>
+                  </div>
+                  <span className="badge badge--warning">{currentExercise.level}</span>
+                </div>
+                <div className="card-body">
+                  <div className="form-group">
+                    <div className="form-label">Escenario</div>
+                    <p className="text-sm text-2">{currentExercise.scenario}</p>
+                  </div>
+                  <div className="form-group">
+                    <div className="form-label">Punto de entrada</div>
+                    <div className="font-mono text-sm" style={{background:'#F3F4F6',padding:'var(--sp-3)',borderRadius:'var(--r-md)',wordBreak:'break-all'}}>{currentExercise.entryPoint}</div>
+                  </div>
+                  <div className="form-group">
+                    <div className="form-label">Pasos esperados</div>
+                    <ol style={{paddingLeft:'var(--sp-5)'}}>
+                      {currentExercise.steps.map(step => <li key={step} className="text-sm mb-2">{step}</li>)}
+                    </ol>
+                  </div>
+                  <div className="alert alert--info">
+                    <span className="alert-icon"></span>
+                    <div><strong>Pista:</strong> {currentExercise.hint}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div className="card mb-5">
+                  <div className="card-header"><span className="card-title">Validador de evidencia</span></div>
+                  <div className="card-body">
+                    <div className="form-group">
+                      <label className="form-label">Evidencia esperada</label>
+                      <div className="font-mono text-sm mb-3" style={{color:'var(--c-warning)'}}>{currentExercise.evidence}</div>
+                      <textarea
+                        className="form-textarea"
+                        rows={4}
+                        placeholder="Pega aquí la evidencia encontrada..."
+                        value={evidenceInput}
+                        onChange={e => { setEvidenceInput(e.target.value); setExerciseResult('idle') }}
+                      />
+                    </div>
+                    <button className="btn btn--warning btn--full" onClick={validateEvidence} disabled={!evidenceInput.trim()}>Validar evidencia</button>
+                    {exerciseResult === 'ok' && <div className="alert alert--success mt-4">Evidencia válida. El impacto queda demostrado.</div>}
+                    {exerciseResult === 'fail' && <div className="alert alert--warning mt-4">Aún no coincide. Revisa la pista y busca la evidencia exacta.</div>}
+                  </div>
+                </div>
+
+                <div className="card">
+                  <div className="card-header"><span className="card-title">Contexto IaC relacionado</span></div>
+                  <div className="card-body flex flex-col gap-3">
+                    <button className="btn btn--outline btn--full" onClick={()=>{setView('editor');setSelectedFile(currentExercise.id === 'webhook' ? 'variables.tf' : currentExercise.id === 'ssrf' ? 'iam.tf' : 'database.tf')}}>Abrir Terraform relacionado</button>
+                    <button className="btn btn--outline btn--full" onClick={()=>setView('recursos')}>Ver recursos afectados</button>
+                    <button className="btn btn--outline btn--full" onClick={()=>setView('plan')}>Revisar plan de cambios</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+
       case 'dashboard': return (
         <div>
           <div className="hero hero--sm" style={{background:'linear-gradient(135deg,#78350F,#B45309)'}}>
@@ -243,6 +468,7 @@ export default function TelcoIaCTab() {
       <aside className="sidebar">
         <div className="sidebar-label">TelcoCore</div>
         {([
+          {v:'ejercicios',icon:'',l:'Laboratorio Cloud'},
           {v:'dashboard',icon:'',l:'Panel IaC'},
           {v:'editor',icon:'',l:'Editor Terraform'},
           {v:'plan',icon:'',l:'Terraform Plan'},

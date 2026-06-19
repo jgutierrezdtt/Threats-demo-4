@@ -2,9 +2,10 @@ import express, { Request, Response, NextFunction } from 'express'
 import cors from 'cors'
 
 const app = express()
-const PORT = 3001
+const PORT = Number(process.env.PORT ?? 3001)
+const CORS_ORIGIN = process.env.CORS_ORIGIN ?? 'http://localhost:5173'
 
-app.use(cors({ origin: 'http://localhost:5173' }))
+app.use(cors({ origin: CORS_ORIGIN }))
 app.use(express.json())
 
 // ─── Auth middleware ────────────────────────────────────────────────────────
@@ -49,6 +50,12 @@ const LINKS = [
 const ACADEMIC_TITLES = [
   { id: 'TTL-001', userId: 'USR-001', name: 'Ingeniería Informática', university: 'UCM', certCode: 'CERT-UCM-2024-001', status: 'verificado' },
   { id: 'TTL-002', userId: 'USR-002', name: 'Medicina',               university: 'UAM', certCode: 'CERT-UAM-2023-047', status: 'verificado' },
+]
+
+const MEDICAL_DEVICES = [
+  { id: 'DEV-INF-0142', model: 'InfuCare VP700', ward: 'ICU East', status: 'online', infusionRate: 18, maxRate: 20 },
+  { id: 'DEV-INF-0188', model: 'InfuCare VP700', ward: 'Oncology Day Unit', status: 'alarm', infusionRate: 42, maxRate: 35 },
+  { id: 'DEV-DIA-0027', model: 'RenalFlow HD90', ward: 'Dialysis Unit', status: 'online' },
 ]
 
 // ─── Rutas Fútbol ───────────────────────────────────────────────────────────
@@ -141,6 +148,43 @@ app.post('/api/telco/plan', authMiddleware, (_req, res) => {
 
 app.post('/api/telco/apply', authMiddleware, (_req, res) => {
   res.json({ status: 'applied', applyId: `apply-${Date.now()}`, resources: 11 })
+})
+
+// ─── Rutas Dispositivos Médicos ─────────────────────────────────────────────
+app.get('/api/devices/fleet', authMiddleware, (_req, res) => {
+  res.json(MEDICAL_DEVICES)
+})
+
+// Fallo funcional: acepta cambios de tasa por rol indicado en cabecera, sin
+// verificar cofirma clínica ni bloquear límites superiores de la librería.
+app.post('/api/devices/:id/therapy/rate', authMiddleware, (req, res) => {
+  const device = MEDICAL_DEVICES.find(d => d.id === req.params.id)
+  if (!device) { res.status(404).json({ error: 'Dispositivo no encontrado' }); return }
+  const { rate, reason } = req.body
+  ;(device as any).infusionRate = Number(rate)
+  ;(device as any).status = Number(rate) > ((device as any).maxRate ?? 999) ? 'alarm' : 'online'
+  res.json({ status: 'accepted', deviceId: device.id, rate: Number(rate), reason: reason || 'not provided', cosignRequired: false })
+})
+
+app.post('/api/devices/:id/calibration/reschedule', authMiddleware, (req, res) => {
+  const { nextCalibration } = req.body
+  res.json({ status: 'scheduled', deviceId: req.params.id, nextCalibration, requiresSupervisorApproval: false })
+})
+
+app.post('/api/devices/notices/:id/close', authMiddleware, (req, res) => {
+  res.json({ status: 'closed', noticeId: req.params.id, reconciledDevices: req.body?.reconciledDevices ?? 0 })
+})
+
+// Fallo de código: validación de path incompleta en exportación de bundles.
+// En una app real debería resolver contra una allowlist por deviceId y rechazar
+// traversal antes de acceder al almacenamiento.
+app.get('/api/devices/support-bundle', authMiddleware, (req, res) => {
+  const file = String(req.query.file ?? 'logs/DEV-INF-0188/service.log')
+  if (file.includes('..') || file.toLowerCase().includes('env')) {
+    res.type('text/plain').send('DEVICE_API_TOKEN=mdt_live_7f41_service_override\nDB_PASSWORD=preprod-medical-devices')
+    return
+  }
+  res.type('text/plain').send(`[INFO] bundle=${file}\n[WARN] Upstream pressure variance detected`)
 })
 
 // ─── Rutas Links ─────────────────────────────────────────────────────────────
